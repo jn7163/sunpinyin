@@ -44,6 +44,7 @@
 static const char *PROP_STATUS = "status";
 static const char *PROP_LETTER = "full_letter";
 static const char *PROP_PUNCT  = "full_punct";
+static const char *PROP_SIMPCN  = "trad_chinese";
 
 PropertyInfo::PropertyInfo()
     : label(NULL), tooltip(NULL)
@@ -92,6 +93,21 @@ SunPinyinProperty::create_punct_prop(ibus::Engine engine, bool state)
     prop.m_info[1].label = ibus_text_new_from_ucs4((const gunichar*) L"，。");
     prop.m_info[1].icon  = IBUS_SUNPINYIN_ICON_DIR"/cnpunc.svg";
     prop.m_info[1].tooltip = ibus_text_new_from_static_string(_("Switch to English punctuation"));
+    prop.init(state);
+    return prop;
+
+}
+
+SunPinyinProperty
+SunPinyinProperty::create_simpcn_prop(ibus::Engine engine, bool state)
+{
+    SunPinyinProperty prop(engine, PROP_SIMPCN);
+    prop.m_info[0].label = ibus_text_new_from_ucs4((const gunichar*) L"繁");
+    prop.m_info[0].icon  = IBUS_SUNPINYIN_ICON_DIR"/trad-chinese.svg";
+    prop.m_info[0].tooltip = ibus_text_new_from_static_string(_("Switch to Simplified Chinese mode"));
+    prop.m_info[1].label = ibus_text_new_from_ucs4((const gunichar*) L"简");
+    prop.m_info[1].icon  = IBUS_SUNPINYIN_ICON_DIR"/simp-chinese.svg";
+    prop.m_info[1].tooltip = ibus_text_new_from_static_string(_("Switch to Traditional Chinese mode"));
     prop.init(state);
     return prop;
 

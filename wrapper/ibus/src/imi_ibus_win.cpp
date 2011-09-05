@@ -99,6 +99,9 @@ CIBusWinHandler::updateStatus(int key, int value)
     case STATUS_ID_FULLSYMBOL:
         m_engine->update_letter_property(value != 0);
         break;
+    case STATUS_ID_STRDCHINESE:
+        m_engine->update_simpcn_property(value != 0);
+        break;
     default:
         break;
     }

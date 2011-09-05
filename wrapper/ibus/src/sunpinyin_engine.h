@@ -42,6 +42,8 @@
 #include "sunpinyin_config.h"
 #include "sunpinyin_property.h"
 #include "sunpinyin_lookup_table.h"
+#include <stdlib.h>
+#include <dlfcn.h>
 
 class ICandidateList;
 class IPreeditString;
@@ -80,6 +82,7 @@ public:
     void update_status_property(bool);
     void update_punct_property(bool);
     void update_letter_property(bool);
+    void update_simpcn_property(bool);
     /* @} */
 
     /* for implemented class */
@@ -121,6 +124,7 @@ private:
     SunPinyinProperty m_status_prop;
     SunPinyinProperty m_letter_prop;
     SunPinyinProperty m_punct_prop;
+    SunPinyinProperty m_simpcn_prop;
     SetupLauncher     m_setup_prop;
 
     SunPinyinLookupTable m_lookup_table;
@@ -130,6 +134,9 @@ private:
     CHotkeyProfile  *m_hotkey_profile;
 
     SunPinyinConfig  m_config;
+
+    char    *(*m_opencc_convert_utf8)(void * t_opencc, char * inbuf, size_t length);
+    void    *m_opencc_od;
 };
 
 #endif // SUNPINYIN_ENGINE_H

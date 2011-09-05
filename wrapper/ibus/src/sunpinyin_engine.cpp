@@ -54,9 +54,12 @@ SunPinyinEngine::SunPinyinEngine(IBusEngine *engine)
       m_status_prop(SunPinyinProperty::create_status_prop(engine)),
       m_letter_prop(SunPinyinProperty::create_letter_prop(engine)),
       m_punct_prop(SunPinyinProperty::create_punct_prop(engine)),
+      m_simpcn_prop(SunPinyinProperty::create_simpcn_prop(engine)),
       m_wh(NULL),
       m_pv(NULL),
-      m_hotkey_profile(NULL)
+      m_hotkey_profile(NULL),
+      m_opencc_convert_utf8(NULL),
+      m_opencc_od(NULL)
 {
     CSunpinyinSessionFactory& factory = CSunpinyinSessionFactory::getFactory();
 
@@ -85,11 +88,26 @@ SunPinyinEngine::SunPinyinEngine(IBusEngine *engine)
     m_wh = new CIBusWinHandler(this);
     m_pv->attachWinHandler(m_wh);
 
+    void *opencc = NULL;
+    void *(*opencc_open)(char * config_file);
+    opencc = dlopen("libopencc.so.1", RTLD_NOW);
+    if (opencc == NULL){
+        opencc = dlopen("libopencc.so.2", RTLD_NOW);
+    }
+    if (opencc) {
+        opencc_open = (void *(*)(char *))dlsym(opencc, "opencc_open");
+        m_opencc_convert_utf8 = (char *(*)(void *, char *, size_t))dlsym(opencc, "opencc_convert_utf8");
+        m_opencc_od = opencc_open((char *)"zhs2zht.ini");
+    }
+
     m_prop_list = ibus_prop_list_new();
 
     ibus_prop_list_append(m_prop_list, m_status_prop);
     ibus_prop_list_append(m_prop_list, m_letter_prop);
     ibus_prop_list_append(m_prop_list, m_punct_prop);
+    if (m_opencc_od) {
+        ibus_prop_list_append(m_prop_list, m_simpcn_prop);
+    }
     ibus_prop_list_append(m_prop_list, m_setup_prop);
 
     update_config();
@@ -207,6 +225,9 @@ SunPinyinEngine::property_activate (const std::string& property, unsigned /*stat
     } else if (m_punct_prop.toggle(property)) {
         m_pv->setStatusAttrValue(CIMIWinHandler::STATUS_ID_FULLPUNC,
                                  m_punct_prop.state());
+    } else if (m_simpcn_prop.toggle(property)) {
+        m_pv->setStatusAttrValue(CIMIWinHandler::STATUS_ID_STRDCHINESE,
+                                 m_simpcn_prop.state());
     } else {
         // try to launch the setup UI
         m_setup_prop.launch(property);
@@ -295,6 +316,12 @@ SunPinyinEngine::commit_string (const std::wstring& str)
 {
     IBusText *text;
     text = ibus_text_new_from_ucs4((const gunichar*) str.c_str());
+    if (!m_simpcn_prop.state() && m_opencc_od){
+        char *ret;
+        ret = m_opencc_convert_utf8(m_opencc_od, text->text, -1);
+        text = ibus_text_new_from_string(ret);
+        free(ret);
+    }
     ibus_engine_commit_text(m_engine, text);
 }
 
@@ -330,7 +357,7 @@ find_embed_preedit_pos(const IPreeditString& preedit)
     return preedit.charTypeSize();
 }
 
-enum {ORANGE = 0xE76F00, GRAY_BLUE = 0x35556B, WHITE = 0xFFFFFF,
+enum {ORANGE = 0xE76F00, GRAY_BLUE = 0xc8c8f0, WHITE = 0xFFFFFF,
       BLACK = 0x000000};
 
 void
@@ -380,6 +407,12 @@ void
 SunPinyinEngine::update_letter_property(bool full)
 {
     m_letter_prop.update(full);
+}
+
+void
+SunPinyinEngine::update_simpcn_property(bool trad)
+{
+    m_simpcn_prop.update(trad);
 }
 
 void

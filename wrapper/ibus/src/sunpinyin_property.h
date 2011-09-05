@@ -63,6 +63,8 @@ public:
                                                 bool state = false);
     static SunPinyinProperty create_punct_prop(ibus::Engine engine,
                                                 bool state = false);
+    static SunPinyinProperty create_simpcn_prop(ibus::Engine engine,
+                                                bool state = true);
     virtual ~SunPinyinProperty();
     bool toggle(const std::string& name);
     void update(bool state);

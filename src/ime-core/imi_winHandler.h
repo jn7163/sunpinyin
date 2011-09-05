@@ -56,7 +56,8 @@ public:
     enum {
         STATUS_ID_CN,
         STATUS_ID_FULLPUNC,
-        STATUS_ID_FULLSYMBOL
+        STATUS_ID_FULLSYMBOL,
+        STATUS_ID_STRDCHINESE
     };
 
 public:

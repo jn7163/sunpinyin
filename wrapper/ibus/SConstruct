@@ -158,6 +158,8 @@ def DoInstall():
                                 'icons/halfwidth.svg',
                                 'icons/han.svg',
                                 'icons/setup.svg',
+                                'icons/simp-chinese.svg',
+                                'icons/trad-chinese.svg',
                                 'icons/sunpinyin-logo.png'])
     component_target = env.Install(env['DATADIR'] + '/ibus/component',
                                    'data/sunpinyin.xml')
